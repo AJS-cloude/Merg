@@ -28,6 +28,8 @@ public class GameBootstrap : MonoBehaviour
             if (config != null) SetPrivate(fm, "config", config);
         }
         if (InventoryManager.Instance == null) new GameObject("InventoryManager").AddComponent<InventoryManager>();
+        if (CharacterInventoryManager.Instance == null)
+            new GameObject("CharacterInventoryManager").AddComponent<CharacterInventoryManager>();
         if (UpgradeManager.Instance == null)
         {
             var go = new GameObject("UpgradeManager");

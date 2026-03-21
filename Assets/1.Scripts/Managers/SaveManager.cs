@@ -16,6 +16,8 @@ public class SaveManager : MonoBehaviour
     const string KeyFactorySlotPrefix = "MergeFactory_Slot_";
     const string KeyInventoryCount = "MergeFactory_InventoryCount";
     const string KeyInventoryPrefix = "MergeFactory_Inv_";
+    const string KeyCharInvCount = "MergeFactory_CharInvCount";
+    const string KeyCharInvPrefix = "MergeFactory_CharInv_";
 
     [SerializeField] GameConfig config;
     [SerializeField] ItemData[] allItemData;
@@ -28,11 +30,11 @@ public class SaveManager : MonoBehaviour
             return;
         }
         Instance = this;
+        LoadGame();
     }
 
     void Start()
     {
-        LoadGame();
         ApplyOfflineReward();
     }
 
@@ -71,6 +73,13 @@ public class SaveManager : MonoBehaviour
             for (int i = 0; i < items.Count; i++)
                 PlayerPrefs.SetString(KeyInventoryPrefix + i, items[i] != null ? items[i].itemId : "");
         }
+        if (CharacterInventoryManager.Instance != null)
+        {
+            var list = CharacterInventoryManager.Instance.GetAllForSave();
+            PlayerPrefs.SetInt(KeyCharInvCount, list.Count);
+            for (int i = 0; i < list.Count; i++)
+                PlayerPrefs.SetString(KeyCharInvPrefix + i, list[i].ToSaveString());
+        }
         PlayerPrefs.Save();
     }
 
@@ -100,6 +109,15 @@ public class SaveManager : MonoBehaviour
             for (int i = 0; i < count; i++)
                 ids.Add(PlayerPrefs.GetString(KeyInventoryPrefix + i, ""));
             InventoryManager.Instance.LoadFromSave(ids, allItemData);
+        }
+
+        if (CharacterInventoryManager.Instance != null)
+        {
+            int count = PlayerPrefs.GetInt(KeyCharInvCount, 0);
+            var lines = new List<string>();
+            for (int i = 0; i < count; i++)
+                lines.Add(PlayerPrefs.GetString(KeyCharInvPrefix + i, ""));
+            CharacterInventoryManager.Instance.LoadFromSave(lines);
         }
     }
 

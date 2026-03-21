@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// GDD: 중앙 Merge Board - 인벤토리 아이템 그리드. 클릭 시 Merge 선택.
+/// 중앙 Merge Board — 인벤토리 그리드. 레거시(ItemData) 또는 캐릭터 인벤.
 /// </summary>
 public class UIInventoryGrid : MonoBehaviour
 {
@@ -13,13 +13,21 @@ public class UIInventoryGrid : MonoBehaviour
     [SerializeField] Color selectedColor = Color.yellow;
     [SerializeField] Color normalColor = Color.white;
 
+    [Header("Character merge")]
+    [SerializeField] CharacterVisualCatalog characterVisuals;
+
     readonly List<UIMergeSlot> _slots = new List<UIMergeSlot>();
 
     void Start()
     {
-        if (InventoryManager.Instance == null) return;
-        InventoryManager.Instance.OnItemAdded += OnInventoryChanged;
-        InventoryManager.Instance.OnItemRemoved += OnInventoryChanged;
+        if (InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.OnItemAdded += OnLegacyInventoryChanged;
+            InventoryManager.Instance.OnItemRemoved += OnLegacyInventoryChanged;
+        }
+        if (CharacterInventoryManager.Instance != null)
+            CharacterInventoryManager.Instance.OnChanged += OnCharacterInventoryChanged;
+
         BuildSlots();
         RefreshAll();
     }
@@ -28,15 +36,16 @@ public class UIInventoryGrid : MonoBehaviour
     {
         if (InventoryManager.Instance != null)
         {
-            InventoryManager.Instance.OnItemAdded -= OnInventoryChanged;
-            InventoryManager.Instance.OnItemRemoved -= OnInventoryChanged;
+            InventoryManager.Instance.OnItemAdded -= OnLegacyInventoryChanged;
+            InventoryManager.Instance.OnItemRemoved -= OnLegacyInventoryChanged;
         }
+        if (CharacterInventoryManager.Instance != null)
+            CharacterInventoryManager.Instance.OnChanged -= OnCharacterInventoryChanged;
     }
 
-    void OnInventoryChanged(int index, ItemData item)
-    {
-        RefreshAll();
-    }
+    void OnLegacyInventoryChanged(int index, ItemData item) => RefreshAll();
+
+    void OnCharacterInventoryChanged() => RefreshAll();
 
     void BuildSlots()
     {
@@ -60,18 +69,25 @@ public class UIInventoryGrid : MonoBehaviour
 
     void RefreshAll()
     {
-        if (InventoryManager.Instance == null || MergeBoard.Instance == null) return;
-        int selected = MergeBoard.Instance.GetSelectedIndex();
-        for (int i = 0; i < _slots.Count; i++)
-        {
-            var item = InventoryManager.Instance.GetAt(i);
-            _slots[i].SetItem(item, i == selected);
-        }
-    }
+        if (MergeBoard.Instance == null) return;
 
-    void Update()
-    {
-        if (MergeBoard.Instance != null)
-            RefreshAll();
+        bool charMode = MergeBoard.Instance.UseCharacterMerge;
+        if (charMode && CharacterInventoryManager.Instance != null)
+        {
+            for (int i = 0; i < _slots.Count; i++)
+            {
+                var p = CharacterInventoryManager.Instance.GetAt(i);
+                bool sel = MergeBoard.Instance.IsIndexSelected(i);
+                _slots[i].SetCharacter(p, characterVisuals, MergeStageProgress.HandsVisible, sel);
+            }
+        }
+        else if (InventoryManager.Instance != null)
+        {
+            for (int i = 0; i < _slots.Count; i++)
+            {
+                var item = InventoryManager.Instance.GetAt(i);
+                _slots[i].SetItem(item, MergeBoard.Instance.IsIndexSelected(i));
+            }
+        }
     }
 }
