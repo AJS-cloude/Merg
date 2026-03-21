@@ -11,11 +11,14 @@ public class UIDefenseWave : MonoBehaviour
 
     void Start()
     {
-        if (WaveManager.Instance != null)
+        if (WaveManager.Instance == null)
         {
-            WaveManager.Instance.OnWaveStarted += OnWaveStarted;
-            Refresh(WaveManager.Instance.CurrentWaveIndex);
+            if (waveText != null) waveText.text = "";
+            enabled = false;
+            return;
         }
+        WaveManager.Instance.OnWaveStarted += OnWaveStarted;
+        Refresh(WaveManager.Instance.CurrentWaveIndex);
     }
 
     void OnDestroy()

@@ -11,14 +11,21 @@ public class UIDefenseStartWave : MonoBehaviour
 
     void Start()
     {
+        bool hasWave = WaveManager.Instance != null;
         if (startButton != null)
-            startButton.onClick.AddListener(OnStartWave);
+        {
+            startButton.interactable = hasWave;
+            if (hasWave)
+                startButton.onClick.AddListener(OnStartWave);
+        }
+        if (buttonLabel != null && !hasWave)
+            buttonLabel.text = "";
     }
 
     void OnStartWave()
     {
-        if (WaveManager.Instance != null)
-            WaveManager.Instance.StartNextWave();
+        if (WaveManager.Instance == null) return;
+        WaveManager.Instance.StartNextWave();
         if (buttonLabel != null)
             buttonLabel.text = "Next Wave";
     }

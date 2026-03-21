@@ -18,6 +18,8 @@ public class MergeBoard : MonoBehaviour
     [Header("Character merge")]
     [SerializeField] byte starterColorIndex;
     [SerializeField] int characterInitialSpawnCount = 3;
+    [Tooltip("머지 성공 시 빈 칸을 스테이지 규칙으로 채움. 비우면 소환 없음.")]
+    [SerializeField] MergeStageSpawnConfig stageSpawnConfig;
 
     int _legacySelectedIndex = -1;
     readonly List<int> _selectedIndices = new List<int>();
@@ -178,7 +180,13 @@ public class MergeBoard : MonoBehaviour
         }
 
         var indices = _selectedIndices.ToArray();
-        CharacterInventoryManager.Instance.ConsumeIndicesAndAddResult(indices, result);
+        if (!CharacterInventoryManager.Instance.ConsumeIndicesAndAddResult(indices, result))
+        {
+            ClearSelection();
+            return;
+        }
+
+        stageSpawnConfig?.TrySpawnAfterMerge(CharacterInventoryManager.Instance);
         ClearSelection();
     }
 

@@ -14,11 +14,16 @@ public class UIDefenseBaseHP : MonoBehaviour
 
     void Start()
     {
-        if (BaseHealthManager.Instance != null)
+        if (BaseHealthManager.Instance == null)
         {
-            BaseHealthManager.Instance.OnHpChanged += OnHpChanged;
-            OnHpChanged(BaseHealthManager.Instance.CurrentHp, BaseHealthManager.Instance.MaxHp);
+            if (hpSlider != null) hpSlider.gameObject.SetActive(false);
+            if (fillImage != null) fillImage.enabled = false;
+            if (hpText != null) hpText.text = "";
+            enabled = false;
+            return;
         }
+        BaseHealthManager.Instance.OnHpChanged += OnHpChanged;
+        OnHpChanged(BaseHealthManager.Instance.CurrentHp, BaseHealthManager.Instance.MaxHp);
     }
 
     void OnDestroy()

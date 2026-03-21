@@ -13,8 +13,13 @@ public class UIDefenseGameOver : MonoBehaviour
     void Start()
     {
         if (panel != null) panel.SetActive(false);
-        if (BaseHealthManager.Instance != null)
-            BaseHealthManager.Instance.OnGameOver += Show;
+        if (BaseHealthManager.Instance == null)
+        {
+            if (retryButton != null) retryButton.gameObject.SetActive(false);
+            enabled = false;
+            return;
+        }
+        BaseHealthManager.Instance.OnGameOver += Show;
         if (retryButton != null)
             retryButton.onClick.AddListener(OnRetry);
     }

@@ -25,6 +25,7 @@ public class UIDefenseSlotPicker : MonoBehaviour
 
     public void OpenForSlot(int slotIndex)
     {
+        if (DefenseManager.Instance == null) return;
         _targetSlotIndex = slotIndex;
         if (panel != null) panel.SetActive(true);
         RefreshButtons();
